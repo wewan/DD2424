@@ -1,0 +1,1 @@
+ [a,b,c] = LoadBatch('data_batch_1.mat');

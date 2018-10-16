@@ -1,0 +1,223 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>assignment4</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-08-18"><meta name="DC.source" content="assignment4.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+<span class="comment">%  WEI WANG @copyright         %</span>
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+<span class="comment">% a = W*h+U*x+b</span>
+<span class="comment">% h = tanh(a)</span>
+<span class="comment">% o = V*h+c</span>
+<span class="comment">% p = softmax(o)</span>
+<span class="comment">% W ---(m x m)</span>
+<span class="comment">% U ---(m x K)</span>
+<span class="comment">% v ---(k x m)</span>
+<span class="comment">% h ---(m x 1)</span>
+<span class="comment">% x ---(K x 1)</span>
+<span class="comment">% b ---(m x 1)</span>
+<span class="comment">% c ---(K x 1)</span>
+clc; close <span class="string">all</span>; clear;
+
+<span class="comment">% read data</span>
+[ind_to_char,char_to_ind,book_data] = Read_Data(<span class="string">'data/Goblet.txt'</span>);
+
+<span class="comment">% check map</span>
+Check_Map(ind_to_char,char_to_ind);
+
+<span class="comment">% init</span>
+[GDparam,RNN] = ParamInit(ind_to_char);
+
+<span class="comment">% synthesize text</span>
+n =10;
+x_0 = <span class="string">'b'</span>;
+h = zeros(GDparam.m,1);
+[generated_onehot,generated_txt] = txt_generator(n,h,GDparam,x_0,RNN, char_to_ind,ind_to_char);
+
+<span class="comment">% calculate gradient</span>
+<span class="comment">%{
+</span><span class="comment">X_chars = book_data(1:GDparam.seq_length);
+</span><span class="comment">Y_chars = book_data(2:GDparam.seq_length+1);
+</span><span class="comment">X_trans = to_onehot(X_chars,char_to_ind);
+</span><span class="comment">Y_trans = to_onehot(Y_chars,char_to_ind);
+</span><span class="comment">
+</span><span class="comment">h0 = zeros(GDparam.m,1);
+</span><span class="comment">l1 = ComputeLoss(X_trans, Y_trans, RNN, h0);
+</span><span class="comment">[a,h,o,p] = Evaluatesynth(X_trans,h0,RNN);
+</span><span class="comment">grads = ComputeGradients(X_trans,Y_trans,RNN,a,h,p);
+</span><span class="comment">num_grads = ComputeGradsNum(X_trans, Y_trans, RNN, 1e-4);
+</span><span class="comment">f = fieldnames(grads)';
+</span><span class="comment">for i=1:numel(f)
+</span><span class="comment">  diff.(f{i}) = norm(grads.(f{i})-num_grads.(f{i}))/max([1e-6,norm(grads.(f{i}))+norm(num_grads.(f{i}))]);
+</span><span class="comment">  sprintf('the difference of gradient %s between two method is %f',(f{i}),diff.(f{i}))
+</span><span class="comment">end
+</span><span class="comment">%}
+</span><span class="comment">% run sgd</span>
+<span class="comment">%{
+</span><span class="comment">[GDparam,RNN] = ParamInit(ind_to_char);
+</span><span class="comment">GDparam.epochnum = 3;
+</span><span class="comment">smooth_box = MiniBatchGD(RNN,GDparam);
+</span><span class="comment">save('smooth_box.mat','smooth_box');
+</span><span class="comment">%}
+</span><span class="comment">% plot loss</span>
+<span class="comment">%</span>
+smooth_box = load(<span class="string">'smooth_box.mat'</span>);
+figure;
+size(smooth_box.smooth_box)
+plot(smooth_box.smooth_box)
+<span class="comment">% hold on</span>
+<span class="comment">% legend('train cost','valid cost')</span>
+xlabel(<span class="string">'iteration'</span>)
+ylabel(<span class="string">'loss'</span>)
+<span class="comment">%}</span>
+</pre><pre class="codeoutput">
+ans =
+
+    'good !'
+
+
+ans =
+
+           1      100000
+
+</pre><img vspace="5" hspace="5" src="assignment4_01.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  WEI WANG @copyright         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% a = W*h+U*x+b
+% h = tanh(a)
+% o = V*h+c
+% p = softmax(o)
+% W REPLACE_WITH_DASH_DASH-(m x m)
+% U REPLACE_WITH_DASH_DASH-(m x K)
+% v REPLACE_WITH_DASH_DASH-(k x m)
+% h REPLACE_WITH_DASH_DASH-(m x 1)
+% x REPLACE_WITH_DASH_DASH-(K x 1)
+% b REPLACE_WITH_DASH_DASH-(m x 1)
+% c REPLACE_WITH_DASH_DASH-(K x 1)
+clc; close all; clear;
+
+% read data
+[ind_to_char,char_to_ind,book_data] = Read_Data('data/Goblet.txt');
+
+% check map
+Check_Map(ind_to_char,char_to_ind);
+
+% init
+[GDparam,RNN] = ParamInit(ind_to_char);
+
+% synthesize text
+n =10;
+x_0 = 'b';
+h = zeros(GDparam.m,1);
+[generated_onehot,generated_txt] = txt_generator(n,h,GDparam,x_0,RNN, char_to_ind,ind_to_char);
+
+% calculate gradient
+%{
+X_chars = book_data(1:GDparam.seq_length);
+Y_chars = book_data(2:GDparam.seq_length+1);
+X_trans = to_onehot(X_chars,char_to_ind);
+Y_trans = to_onehot(Y_chars,char_to_ind);
+
+h0 = zeros(GDparam.m,1);
+l1 = ComputeLoss(X_trans, Y_trans, RNN, h0);
+[a,h,o,p] = Evaluatesynth(X_trans,h0,RNN);
+grads = ComputeGradients(X_trans,Y_trans,RNN,a,h,p);
+num_grads = ComputeGradsNum(X_trans, Y_trans, RNN, 1e-4);
+f = fieldnames(grads)';
+for i=1:numel(f)
+  diff.(f{i}) = norm(grads.(f{i})-num_grads.(f{i}))/max([1e-6,norm(grads.(f{i}))+norm(num_grads.(f{i}))]);
+  sprintf('the difference of gradient %s between two method is %f',(f{i}),diff.(f{i}))
+end
+%}
+% run sgd
+%{
+[GDparam,RNN] = ParamInit(ind_to_char);
+GDparam.epochnum = 3;
+smooth_box = MiniBatchGD(RNN,GDparam);
+save('smooth_box.mat','smooth_box');
+%}
+% plot loss
+%
+smooth_box = load('smooth_box.mat');
+figure;
+size(smooth_box.smooth_box)
+plot(smooth_box.smooth_box)
+% hold on 
+% legend('train cost','valid cost')
+xlabel('iteration')
+ylabel('loss')
+%}
+
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>
